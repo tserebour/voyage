@@ -1,0 +1,34 @@
+version: '3.1'
+services:
+  rustapp:
+    container_name: voyage-rust
+    image: voyage-rustapp:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: 
+          postgres://actix:actix@voyage-postgres-db:5432/actix
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+
+
+  postgres:
+    container_name: voyage-postgres-db
+    image: postgres:11-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: actix
+      POSTGRES_USER: actix
+      POSTGRES_DB: actix
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+volumes:
+  pgdata: {}
