@@ -4,3 +4,12 @@ CREATE TABLE users (
   email VARCHAR(255) NOT NULL UNIQUE, 
   password VARCHAR(255) NOT NULL  
 );
+
+
+CREATE TABLE bra_fie_users(
+  id SERIAL PRIMARY KEY,
+  fullname VARCHAR(255) NOT NULL, 
+  email VARCHAR(255) NOT NULL UNIQUE, 
+  phone VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL  
+);
