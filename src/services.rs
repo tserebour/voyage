@@ -194,6 +194,7 @@ async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_models::Vo
         Err(err) =>{
         println!("Error creating user: {}", err);  // Log the actual error
         HttpResponse::InternalServerError().finish()  
+        
     }
 
 
@@ -222,14 +223,14 @@ async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<voyage_m
 
     match user_result {
     Ok(user) => {
-    if user.password != password {
-        Ok(HttpResponse::Ok().json("Invalid Credentials"))
-        
-    }else {
+        if user.password != password {
+            Ok(HttpResponse::Ok().json("Invalid Credentials"))
+            
+        }else {
 
-        Ok(HttpResponse::Ok().json(&user))
+            Ok(HttpResponse::Ok().json(&user))
 
-    }
+        }
     },
     Err(err) => {
     // Convert sqlx::Error to actix_web::Error
