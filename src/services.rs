@@ -12,6 +12,7 @@ use sqlx::{self, FromRow};
 use serde::{Serialize, Deserialize};
 
 use crate::AppState;
+mod models;
 
 
 
