@@ -28,8 +28,8 @@ async fn main() -> std::io::Result<()> {
 
 
     // let database_url = var("DATABASE_URL").expect("DATABASE_URL not set");
-    // let database_url: &str = "postgres://actix:actix@voyage-postgres-db/actix";
-    let database_url: &str = "postgres://actix:actix@172.21.0.2/actix";
+    let database_url: &str = "postgres://actix:actix@voyage-postgres-db/actix";
+    // let database_url: &str = "postgres://actix:actix@172.21.0.2/actix";
 
 
     
