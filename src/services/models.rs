@@ -15,19 +15,19 @@ pub mod models{
 
         #[derive(Serialize,Deserialize, Clone,FromRow)]
         pub struct VoyageUser{
-            id: Option<i32>,
-            username: String,
-            email: String,
-            password: String,
+            pub id: Option<i32>,
+            pub fullname: String,
+            pub email: String,
+            pub password: String,
 
         }
 
         #[derive(Serialize,Deserialize, Clone,FromRow)]
         pub struct VoyageDriver{
-            id: Option<i32>,
-            fullname: String,
-            email: String,
-            password: String,
+            pub id: Option<i32>,
+            pub fullname: String,
+            pub email: String,
+            pub password: String,
         }
 
 
@@ -38,16 +38,16 @@ pub mod models{
 
         #[derive(Debug)]
         #[derive(Serialize,Deserialize, Clone,FromRow)]
-        struct VoyageUserLoginCredentials {
-            email: String,
-            password: String,
+        pub struct VoyageUserLoginCredentials {
+            pub email: String,
+            pub password: String,
         }
 
         #[derive(Debug)]
         #[derive(Serialize,Deserialize, Clone,FromRow)]
-        struct VoyageDriverLoginCredentials {
-            email: String,
-            password: String,
+        pub struct VoyageDriverLoginCredentials {
+            pub email: String,
+            pub password: String,
         }
 
        
@@ -72,20 +72,20 @@ pub mod models{
         #[derive(Debug)]
         #[derive(Serialize,Deserialize, Clone,FromRow)]
         pub struct BraFieUser{
-            id: Option<i32>,
-            fullname: String,
-            email: String,
-            phone: String,
-            password: String,
+            pub id: Option<i32>,
+            pub fullname: String,
+            pub email: String,
+            pub phone: String,
+            pub password: String,
                 
         }
 
 
         #[derive(Debug)]
         #[derive(Serialize,Deserialize, Clone,FromRow)]
-        struct BraFieLoginCredentials {
-            email: String,
-            password: String,
+        pub struct BraFieLoginCredentials {
+            pub email: String,
+            pub password: String,
         }
 
     }

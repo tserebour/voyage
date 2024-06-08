@@ -6,70 +6,20 @@ use actix_web::{get,
 };
 
 
-use sqlx::{self, FromRow};
 
-
-use serde::{Serialize, Deserialize};
 
 use crate::AppState;
 mod models;
 
-
-
-
-#[derive(Serialize,Deserialize, Clone,FromRow)]
-pub struct VoyageUser{
-    id: Option<i32>,
-    username: String,
-    email: String,
-    password: String,
-
-}
-
-#[derive(Serialize,Deserialize, Clone,FromRow)]
-pub struct VoyageDriver{
-    id: Option<i32>,
-    fullname: String,
-    email: String,
-    password: String,
-}
-
-
-
-#[derive(Debug)]
-#[derive(Serialize,Deserialize, Clone,FromRow)]
-pub struct BraFieUser{
-    id: Option<i32>,
-    fullname: String,
-    email: String,
-    phone: String,
-    password: String,
-        
-}
+use models::models::voyage_models;
+use models::models::bra_fie_models;
 
 
 
 
-#[derive(Debug)]
-#[derive(Serialize,Deserialize, Clone,FromRow)]
-struct VoyageUserLoginCredentials {
-    email: String,
-    password: String,
-}
 
-#[derive(Debug)]
-#[derive(Serialize,Deserialize, Clone,FromRow)]
-struct VoyageDriverLoginCredentials {
-    email: String,
-    password: String,
-}
 
-#[derive(Debug)]
-#[derive(Serialize,Deserialize, Clone,FromRow)]
-struct BraFieLoginCredentials {
-    email: String,
-    password: String,
-}
+
 
 
 
@@ -81,12 +31,12 @@ async fn index() -> impl Responder {
 }
 
 #[post("/voyage/users/create")]
-async fn create_user(state:Data<AppState>, body: Json<VoyageUser>) -> impl Responder {
+async fn voyage_create_user(state:Data<AppState>, body: Json<voyage_models::VoyageUser>) -> impl Responder {
 
-    match sqlx::query_as::<_,VoyageUser>(
-        "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id,username, email, password",
+    match sqlx::query_as::<_,voyage_models::VoyageUser>(
+        "INSERT INTO voyage_users (fullname, email, password) VALUES ($1, $2, $3) RETURNING id,fullname, email, password",
     )
-    .bind(body.username.to_string())
+    .bind(body.fullname.to_string())
     .bind(body.email.to_string())
     .bind(body.password.to_string())
 
@@ -97,8 +47,8 @@ async fn create_user(state:Data<AppState>, body: Json<VoyageUser>) -> impl Respo
     {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(err) =>{
-        println!("Error creating user: {}", err);  // Log the actual error
-        HttpResponse::InternalServerError().finish()  
+        println!("Error creating user: {}", err); 
+        HttpResponse::InternalServerError().finish()
     }
 
 
@@ -115,15 +65,15 @@ async fn create_user(state:Data<AppState>, body: Json<VoyageUser>) -> impl Respo
 
 
 #[post("/voyage/users/login")]
-async fn sign_in(state: Data<AppState>, credentials: Json<VoyageDriverLoginCredentials>) -> Result<HttpResponse, actix_web::Error> {
+async fn voyage_user_sign_in(state: Data<AppState>, credentials: Json<voyage_models::VoyageDriverLoginCredentials>) -> Result<HttpResponse, actix_web::Error> {
 let email = credentials.email.clone();
 let password = credentials.password.clone();
 
 // 1. Validate email and password (optional)
 // You can add logic here to validate email format or password length
 
-let user_result = sqlx::query_as::<_, VoyageUser>(
-    "SELECT * FROM users WHERE username = $1;",
+let user_result = sqlx::query_as::<_, voyage_models::VoyageUser>(
+    "SELECT * FROM voyage_users WHERE email = $1;",
 )
 .bind(email)
 .fetch_one(&state.db)
@@ -157,14 +107,14 @@ match user_result {
 
 
 #[post("/bra_fie/users/login")]
-async fn bra_fie_sign_in(state: Data<AppState>, credentials: Json<BraFieLoginCredentials>) -> Result<HttpResponse, actix_web::Error> {
+async fn bra_fie_sign_in(state: Data<AppState>, credentials: Json<bra_fie_models::BraFieLoginCredentials>) -> Result<HttpResponse, actix_web::Error> {
     let username = credentials.email.clone();
     let password = credentials.password.clone();
 
     // 1. Validate email and password (optional)
     // You can add logic here to validate email format or password length
 
-    let user_result = sqlx::query_as::<_, BraFieUser>(
+    let user_result = sqlx::query_as::<_, bra_fie_models::BraFieUser>(
         "SELECT * FROM bra_fie_users WHERE email = $1;",
     )
     .bind(username)
@@ -199,9 +149,9 @@ async fn bra_fie_sign_in(state: Data<AppState>, credentials: Json<BraFieLoginCre
 
 
 #[post("/bra_fie/users/create")]
-async fn bra_fie_create_user(state:Data<AppState>, body: Json<BraFieUser>) -> impl Responder {
+async fn bra_fie_create_user(state:Data<AppState>, body: Json<bra_fie_models::BraFieUser>) -> impl Responder {
 
-    match sqlx::query_as::<_,BraFieUser>(
+    match sqlx::query_as::<_,bra_fie_models::BraFieUser>(
         "INSERT INTO bra_fie_users (fullname, email, phone, password) VALUES ($1, $2,$3, $4) RETURNING id,fullname, email,phone, password",
     )
     .bind(body.fullname.to_string())
@@ -226,9 +176,9 @@ async fn bra_fie_create_user(state:Data<AppState>, body: Json<BraFieUser>) -> im
 
 
 #[post("/voyage/drivers/create")]
-async fn voyage_create_driver(state:Data<AppState>, body: Json<VoyageDriver>) -> impl Responder {
+async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_models::VoyageDriver>) -> impl Responder {
 
-    match sqlx::query_as::<_,VoyageDriver>(
+    match sqlx::query_as::<_,voyage_models::VoyageDriver>(
         "INSERT INTO drivers_users (fullname, email, password) VALUES ($1, $2, $3) RETURNING id,fullname, email, password",
     )
     .bind(body.fullname.to_string())
@@ -252,7 +202,7 @@ async fn voyage_create_driver(state:Data<AppState>, body: Json<VoyageDriver>) ->
 
 
 #[post("/voyage/drivers/login")]
-async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<VoyageDriverLoginCredentials>) -> Result<HttpResponse, actix_web::Error> {
+async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<voyage_models::VoyageDriverLoginCredentials>) -> Result<HttpResponse, actix_web::Error> {
     
     let email = credentials.email.clone();
     let password = credentials.password.clone();
@@ -260,7 +210,7 @@ async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<VoyageDr
     // 1. Validate email and password (optional)
     // You can add logic here to validate email format or password length
 
-    let user_result = sqlx::query_as::<_, VoyageDriver>(
+    let user_result = sqlx::query_as::<_, voyage_models::VoyageDriver>(
     "SELECT * FROM drivers_users WHERE email = $1;",
     )
     .bind(email)
