@@ -7,19 +7,30 @@ pub mod models{
 
     use serde::{Serialize, Deserialize};
     use sqlx::{self, FromRow};
+    // use chrono::NaiveDateTime;
 
 
 
 
 
 
+    #[derive(Serialize, Deserialize, Clone, FromRow)]
+    pub struct VoyageUser {
+        pub id: Option<i32>,
+        pub fullname: String,
+        pub email: String,
+        pub password: String,
+        pub phone_number: String,
+        pub account_created_at: i32,
+        pub last_login_at: Option<i32>,
+    }
+
+
+    #[derive(Debug)]
         #[derive(Serialize,Deserialize, Clone,FromRow)]
-        pub struct VoyageUser{
-            pub id: Option<i32>,
-            pub fullname: String,
+        pub struct VoyageUserLoginCredentials {
             pub email: String,
             pub password: String,
-
         }
 
         #[derive(Serialize,Deserialize, Clone,FromRow)]
@@ -36,12 +47,7 @@ pub mod models{
 
 
 
-        #[derive(Debug)]
-        #[derive(Serialize,Deserialize, Clone,FromRow)]
-        pub struct VoyageUserLoginCredentials {
-            pub email: String,
-            pub password: String,
-        }
+        
 
         #[derive(Debug)]
         #[derive(Serialize,Deserialize, Clone,FromRow)]
@@ -50,7 +56,7 @@ pub mod models{
             pub password: String,
         }
 
-       
+    
         
 
     }

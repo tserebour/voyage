@@ -10,9 +10,13 @@ use actix_web::{get,
 
 use crate::AppState;
 mod models;
+mod helper_functions;
+
 
 use models::models::voyage_models;
 use models::models::bra_fie_models;
+use helper_functions::helpers_functions::{hash_password,verify_password};
+
 
 
 
@@ -27,31 +31,48 @@ use models::models::bra_fie_models;
 
 #[get("/")]
 async fn index() -> impl Responder {
+    
+
     format!("login route")
 }
 
 #[post("/voyage/users/create")]
-async fn voyage_create_user(state:Data<AppState>, body: Json<voyage_models::VoyageUser>) -> impl Responder {
+async fn voyage_create_user(
+    state: Data<AppState>,
+    body: Json<voyage_models::VoyageUser>,
+) -> impl Responder {
 
-    match sqlx::query_as::<_,voyage_models::VoyageUser>(
-        "INSERT INTO voyage_users (fullname, email, password) VALUES ($1, $2, $3) RETURNING id,fullname, email, password",
+
+    let now = chrono::Utc::now().to_rfc3339();
+
+    let user = voyage_models::VoyageUser {
+        id: None,
+        fullname: body.fullname.clone(),
+        email: body.email.clone(),
+        password: body.password.clone(),
+        phone_number: body.phone_number.clone(),
+        account_created_at: now.parse().unwrap_or_default(),
+        last_login_at: None,
+    };
+
+    match sqlx::query_as::<_, voyage_models::VoyageUser>(
+        "INSERT INTO voyage_users (fullname, email, password, phone_number, account_created_at)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at",
     )
-    .bind(body.fullname.to_string())
-    .bind(body.email.to_string())
-    .bind(body.password.to_string())
-
+    .bind(&user.fullname)
+    .bind(&user.email)
+    .bind(&user.password)
+    .bind(&user.phone_number)
+    .bind(&user.account_created_at)
     .fetch_one(&state.db)
     .await
-
-
     {
         Ok(user) => HttpResponse::Ok().json(user),
-        Err(err) =>{
-        println!("Error creating user: {}", err); 
-        HttpResponse::InternalServerError().finish()
-    }
-
-
+        Err(err) => {
+            println!("Error creating user: {}", err);
+            HttpResponse::InternalServerError().finish()
+        }
     }
 }
 
