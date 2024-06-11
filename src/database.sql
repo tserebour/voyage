@@ -36,6 +36,7 @@ CREATE TABLE ride_requests (
     dropoff_latitude FLOAT NOT NULL,
     dropoff_longitude FLOAT NOT NULL,
     ride_type_id INT NOT NULL REFERENCES ride_types(id),
+    car_id INT NOT NULL REFERENCES cars(id),
     estimated_fare NUMERIC(10, 2),
     requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status TEXT NOT NULL DEFAULT 'REQUESTED'
@@ -52,6 +53,25 @@ CREATE TABLE rides (
     feedback TEXT
 );
 
+CREATE TABLE voyage_drivers (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES voyage_users(id),
+    license_number TEXT NOT NULL UNIQUE,
+    vehicle_information TEXT,
+    rating FLOAT DEFAULT 0,
+    -- Add any additional columns specific to drivers
+);
+
+
+CREATE TABLE cars (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    capacity INT NOT NULL,
+    ride_type_id INT NOT NULL REFERENCES ride_types(id),
+    driver_id INT NOT NULL REFERENCES voyage_drivers(id)
+);
+
 
 
 CREATE TABLE drivers_users (
@@ -59,6 +79,9 @@ CREATE TABLE drivers_users (
   fullname VARCHAR(255) NOT NULL, 
   email VARCHAR(255) NOT NULL UNIQUE, 
   password VARCHAR(255) NOT NULL
+  license_number TEXT NOT NULL UNIQUE,
+  vehicle_information TEXT,
+  rating FLOAT DEFAULT 0,
 
 );
 
