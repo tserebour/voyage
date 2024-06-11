@@ -1,5 +1,8 @@
-use actix::fut::ok;
-use actix_web::{get, post, web::{Data,Json}, Error, HttpResponse, Responder
+// use actix::fut::ok;
+use actix_web::{get, post, web::{Data,Json},
+
+// , Error, 
+HttpResponse, Responder
 };
 
 
@@ -7,14 +10,15 @@ use actix_web::{get, post, web::{Data,Json}, Error, HttpResponse, Responder
 
 use crate::AppState;
 mod models;
+mod voyage_user_sign_up_model;
 mod helper_functions;
 
-
+// use voyage_user_sign_up_model::VoyageUser;
 use models::models::voyage_models;
 use models::models::bra_fie_models;
 use helper_functions::helpers_functions::{hash_password,verify_password};
 
-use chrono::NaiveDateTime;
+// use chrono::NaiveDateTime;
 
 
 
@@ -37,16 +41,13 @@ async fn index() -> impl Responder {
 }
 
 #[post("/voyage/users/create")]
-async fn voyage_create_user(
-    state: Data<AppState>,
-    body: Json<voyage_models::VoyageUser>,
-) -> impl Responder {
+async fn voyage_create_user(state: Data<AppState>,body: Json<voyage_user_sign_up_model::VoyageUser>,) -> impl Responder {
 
 
     
-    let now = chrono::Utc::now().naive_utc();
+    // let now = chrono::Utc::now().naive_utc();
     
-    let user = voyage_models::VoyageUser {
+    let user = voyage_user_sign_up_model::VoyageUser {
         id: None,
         fullname: body.fullname.clone(),
         email: body.email.clone(),
@@ -56,7 +57,7 @@ async fn voyage_create_user(
         last_login_at: None,
     };
 
-    match sqlx::query_as::<_, voyage_models::VoyageUser>(
+    match sqlx::query_as::<_, voyage_user_sign_up_model::VoyageUser>(
         "INSERT INTO voyage_users (fullname, email, password, phone_number)
         VALUES ($1, $2, $3, $4)
         RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at",
@@ -94,7 +95,7 @@ let plain_password = credentials.password.clone();
 // 1. Validate email and password (optional)
 // You can add logic here to validate email format or password length
 
-let user_result = sqlx::query_as::<_, voyage_models::VoyageUser>(
+let user_result = sqlx::query_as::<_, voyage_user_sign_up_model::VoyageUser>(
     "SELECT * FROM voyage_users WHERE email = $1;",
 )
 .bind(email)
@@ -114,7 +115,7 @@ match user_result {
                 let id = user.id.unwrap();
                 
 
-                let user_last_login_update = sqlx::query_as::<_, voyage_models::VoyageUser>(
+                let user_last_login_update = sqlx::query_as::<_, voyage_user_sign_up_model::VoyageUser>(
                     "UPDATE voyage_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1 
                     RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at;",
                 )
@@ -181,9 +182,10 @@ async fn create_ride_request(state: Data<AppState>, ride_request: Json<voyage_mo
             dropoff_address,
             dropoff_latitude,
             dropoff_longitude,
-            ride_type_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, user_id, pickup_address, pickup_latitude, pickup_longitude, dropoff_address, dropoff_latitude, dropoff_longitude, ride_type_id, estimated_fare, requested_at, status;"
+            ride_type_id,
+            car_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, user_id, pickup_address, pickup_latitude, pickup_longitude, dropoff_address, dropoff_latitude, dropoff_longitude, ride_type_id, estimated_fare, requested_at, status,car_id;"
         )
         .bind(ride_request.user_id.clone())
         .bind(ride_request.pickup_address.clone())
@@ -192,7 +194,9 @@ async fn create_ride_request(state: Data<AppState>, ride_request: Json<voyage_mo
         .bind(ride_request.pickup_longitude.clone())
         .bind(ride_request.dropoff_latitude.clone())
         .bind(ride_request.dropoff_longitude.clone())
-        .bind(ride_request.ride_type_id.clone())    
+        .bind(ride_request.ride_type_id.clone())   
+        .bind(ride_request.car_id.clone())    
+
         .fetch_one(&state.db)
         .await;
 
