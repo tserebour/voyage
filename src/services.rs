@@ -1,8 +1,5 @@
-use actix_web::{get, 
-    post, 
-    web::{Data,Json}, 
-    HttpResponse, 
-    Responder
+use actix::fut::ok;
+use actix_web::{get, post, web::{Data,Json}, Error, HttpResponse, Responder
 };
 
 
@@ -16,6 +13,9 @@ mod helper_functions;
 use models::models::voyage_models;
 use models::models::bra_fie_models;
 use helper_functions::helpers_functions::{hash_password,verify_password};
+
+use chrono::NaiveDateTime;
+
 
 
 
@@ -43,28 +43,29 @@ async fn voyage_create_user(
 ) -> impl Responder {
 
 
-    let now = chrono::Utc::now().to_rfc3339();
-
+    
+    let now = chrono::Utc::now().naive_utc();
+    
     let user = voyage_models::VoyageUser {
         id: None,
         fullname: body.fullname.clone(),
         email: body.email.clone(),
-        password: body.password.clone(),
+        password: hash_password(&body.password).unwrap().clone(),
         phone_number: body.phone_number.clone(),
-        account_created_at: now.parse().unwrap_or_default(),
+        account_created_at: None,
         last_login_at: None,
     };
 
     match sqlx::query_as::<_, voyage_models::VoyageUser>(
-        "INSERT INTO voyage_users (fullname, email, password, phone_number, account_created_at)
-        VALUES ($1, $2, $3, $4, $5)
+        "INSERT INTO voyage_users (fullname, email, password, phone_number)
+        VALUES ($1, $2, $3, $4)
         RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at",
     )
     .bind(&user.fullname)
     .bind(&user.email)
     .bind(&user.password)
     .bind(&user.phone_number)
-    .bind(&user.account_created_at)
+    
     .fetch_one(&state.db)
     .await
     {
@@ -88,7 +89,7 @@ async fn voyage_create_user(
 #[post("/voyage/users/login")]
 async fn voyage_user_sign_in(state: Data<AppState>, credentials: Json<voyage_models::VoyageDriverLoginCredentials>) -> Result<HttpResponse, actix_web::Error> {
 let email = credentials.email.clone();
-let password = credentials.password.clone();
+let plain_password = credentials.password.clone();
 
 // 1. Validate email and password (optional)
 // You can add logic here to validate email format or password length
@@ -103,15 +104,55 @@ let user_result = sqlx::query_as::<_, voyage_models::VoyageUser>(
 
 match user_result {
     Ok(user) => {
-    if user.password != password {
-        Ok(HttpResponse::Ok().json("Invalid Username and Password"))
+        let verify_password_result = verify_password(&plain_password, &user.password);
+
+        match verify_password_result{
+
+            Ok(true) => {
+
+
+                let id = user.id.unwrap();
+                
+
+                let user_last_login_update = sqlx::query_as::<_, voyage_models::VoyageUser>(
+                    "UPDATE voyage_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1 
+                    RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at;",
+                )
+                .bind(id)
+                .fetch_one(&state.db)
+                .await; // Use await? 
+
+
+            
         
-    }else {
+                match user_last_login_update{
+                    Ok(_) =>{
+                        Ok(HttpResponse::Ok().json(&user))
+                    },
+                    Err(err) => {
+                        println!("Error updating last login time: {}", err);
+                        return Err(actix_web::error::ErrorInternalServerError(err.to_string()));
+                    }
+                }
+        
+                
+            },
+            Ok(false) => {
+                return Err(actix_web::error::ErrorInternalServerError("Invalid email or password"));
 
-        Ok(HttpResponse::Ok().json(&user))
+            },
 
-    }
-},
+            Err(err) => {
+                println!("Error verifying password: {}", err);
+                return Err(actix_web::error::ErrorInternalServerError(err.to_string()));
+            }
+
+
+        }
+
+
+
+    },
     Err(err) => {
         // Convert sqlx::Error to actix_web::Error
         let actix_err = actix_web::error::ErrorInternalServerError(err.to_string());
@@ -124,6 +165,44 @@ match user_result {
 
 // println!("Success");
 // Ok(HttpResponse::Ok().json(user_result.unwrap().clone()))
+}
+
+
+
+#[post("/ride_requests")]
+async fn create_ride_request(state: Data<AppState>, ride_request: Json<voyage_models::RideRequest>) -> Result<HttpResponse, actix_web::Error> {
+    let result = sqlx::query_as::<_, voyage_models::RideRequest>(
+        
+        "INSERT INTO ride_requests (
+            user_id,
+            pickup_address,
+            pickup_latitude,
+            pickup_longitude,
+            dropoff_address,
+            dropoff_latitude,
+            dropoff_longitude,
+            ride_type_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, user_id, pickup_address, pickup_latitude, pickup_longitude, dropoff_address, dropoff_latitude, dropoff_longitude, ride_type_id, estimated_fare, requested_at, status;"
+        )
+        .bind(ride_request.user_id.clone())
+        .bind(ride_request.pickup_address.clone())
+        .bind(ride_request.pickup_latitude.clone())
+        .bind(ride_request.dropoff_address.clone())
+        .bind(ride_request.pickup_longitude.clone())
+        .bind(ride_request.dropoff_latitude.clone())
+        .bind(ride_request.dropoff_longitude.clone())
+        .bind(ride_request.ride_type_id.clone())    
+        .fetch_one(&state.db)
+        .await;
+
+    match result {
+        Ok(ride_request) => Ok(HttpResponse::Ok().json(ride_request)),
+        Err(err) => {
+            println!("Error creating ride request: {}", err);
+            Ok(HttpResponse::InternalServerError().finish())
+        }
+    }
 }
 
 
