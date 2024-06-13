@@ -1,10 +1,3 @@
--- CREATE TABLE voyage_users (
---   id SERIAL PRIMARY KEY,
---   fullname VARCHAR(255) NOT NULL, 
---   email VARCHAR(255) NOT NULL UNIQUE, 
---   password VARCHAR(255) NOT NULL
-    
--- );
 
 
 CREATE TABLE voyage_users (
@@ -26,40 +19,16 @@ CREATE TABLE ride_types (
     rate_per_minute NUMERIC(10, 2) NOT NULL
 );
 
-CREATE TABLE ride_requests (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES voyage_users(id),
-    pickup_address TEXT NOT NULL,
-    pickup_latitude FLOAT NOT NULL,
-    pickup_longitude FLOAT NOT NULL,
-    dropoff_address TEXT NOT NULL,
-    dropoff_latitude FLOAT NOT NULL,
-    dropoff_longitude FLOAT NOT NULL,
-    ride_type_id INT NOT NULL REFERENCES ride_types(id),
-    car_id INT NOT NULL REFERENCES cars(id),
-    estimated_fare NUMERIC(10, 2),
-    requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status TEXT NOT NULL DEFAULT 'REQUESTED'
-);
-
-CREATE TABLE rides (
-    id SERIAL PRIMARY KEY,
-    ride_request_id INT NOT NULL REFERENCES ride_requests(id),
-    driver_id INT NOT NULL REFERENCES voyage_users(id),
-    start_time TIMESTAMP,
-    end_time TIMESTAMP,
-    actual_fare NUMERIC(10, 2),
-    rating INT,
-    feedback TEXT
-);
 
 CREATE TABLE voyage_drivers (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL UNIQUE REFERENCES voyage_users(id),
-    license_number TEXT NOT NULL UNIQUE,
-    vehicle_information TEXT,
-    rating FLOAT DEFAULT 0,
-    -- Add any additional columns specific to drivers
+  id SERIAL PRIMARY KEY,
+  fullname VARCHAR(255) NOT NULL, 
+  email VARCHAR(255) NOT NULL UNIQUE, 
+  password VARCHAR(255) NOT NULL,
+  license_number TEXT,
+  vehicle_information TEXT,
+  rating FLOAT DEFAULT 0
+
 );
 
 
@@ -74,16 +43,41 @@ CREATE TABLE cars (
 
 
 
-CREATE TABLE drivers_users (
-  id SERIAL PRIMARY KEY,
-  fullname VARCHAR(255) NOT NULL, 
-  email VARCHAR(255) NOT NULL UNIQUE, 
-  password VARCHAR(255) NOT NULL
-  license_number TEXT NOT NULL UNIQUE,
-  vehicle_information TEXT,
-  rating FLOAT DEFAULT 0,
-
+CREATE TABLE ride_requests (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES voyage_users(id),
+    pickup_address TEXT NOT NULL,
+    pickup_latitude FLOAT NOT NULL,
+    pickup_longitude FLOAT NOT NULL,
+    dropoff_address TEXT NOT NULL,
+    dropoff_latitude FLOAT NOT NULL,
+    dropoff_longitude FLOAT NOT NULL,
+    ride_type_id INT NOT NULL REFERENCES ride_types(id),
+    car_id INT NOT NULL REFERENCES cars(id),
+    estimated_fare NUMERIC(10, 2),
+    requested_at VARCHAR(255) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status TEXT NOT NULL DEFAULT 'REQUESTED'
 );
+
+CREATE TABLE rides (
+    id SERIAL PRIMARY KEY,
+    ride_request_id INT NOT NULL REFERENCES ride_requests(id),
+    driver_id INT NOT NULL REFERENCES voyage_users(id),
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    actual_fare NUMERIC(10, 2),
+    rating INT,
+    feedback TEXT
+);
+
+
+
+
+
+
+
+
+
 
 
 CREATE TABLE bra_fie_users(

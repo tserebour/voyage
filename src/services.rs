@@ -190,8 +190,8 @@ async fn create_ride_request(state: Data<AppState>, ride_request: Json<voyage_mo
         .bind(ride_request.user_id.clone())
         .bind(ride_request.pickup_address.clone())
         .bind(ride_request.pickup_latitude.clone())
-        .bind(ride_request.dropoff_address.clone())
         .bind(ride_request.pickup_longitude.clone())
+        .bind(ride_request.dropoff_address.clone())
         .bind(ride_request.dropoff_latitude.clone())
         .bind(ride_request.dropoff_longitude.clone())
         .bind(ride_request.ride_type_id.clone())   
@@ -283,7 +283,7 @@ async fn bra_fie_create_user(state:Data<AppState>, body: Json<bra_fie_models::Br
 async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_models::VoyageDriver>) -> impl Responder {
 
     match sqlx::query_as::<_,voyage_models::VoyageDriver>(
-        "INSERT INTO drivers_users (fullname, email, password) VALUES ($1, $2, $3) RETURNING id,fullname, email, password",
+        "INSERT INTO voyage_drivers (fullname, email, password) VALUES ($1, $2, $3) RETURNING id,fullname, email, password",
     )
     .bind(body.fullname.to_string())
     .bind(body.email.to_string())
@@ -316,7 +316,7 @@ async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<voyage_m
     // You can add logic here to validate email format or password length
 
     let user_result = sqlx::query_as::<_, voyage_models::VoyageDriver>(
-    "SELECT * FROM drivers_users WHERE email = $1;",
+    "SELECT * FROM voyage_drivers WHERE email = $1;",
     )
     .bind(email)
     .fetch_one(&state.db)
