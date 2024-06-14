@@ -11,7 +11,9 @@ HttpResponse, Responder
 use crate::AppState;
 mod models;
 mod voyage_user_sign_up_model;
+mod driver_location_update_model;
 mod helper_functions;
+
 
 // use voyage_user_sign_up_model::VoyageUser;
 use models::models::voyage_models;
@@ -282,13 +284,16 @@ async fn bra_fie_create_user(state:Data<AppState>, body: Json<bra_fie_models::Br
 #[post("/voyage/drivers/create")]
 async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_models::VoyageDriver>) -> impl Responder {
 
-    match sqlx::query_as::<_,voyage_models::VoyageDriver>(
-        "INSERT INTO voyage_drivers (fullname, email, password) VALUES ($1, $2, $3) RETURNING id,fullname, email, password",
+    match sqlx::query_as::<_, voyage_models::VoyageDriver>(
+        "INSERT INTO voyage_drivers (fullname, email, password, license_number, vehicle_information) 
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, fullname, email, password, license_number, vehicle_information, rating",
     )
     .bind(body.fullname.to_string())
     .bind(body.email.to_string())
-    .bind(body.password.to_string())
-
+    .bind(hash_password(&body.password).unwrap().clone())
+    .bind(body.license_number.clone())
+    .bind(body.vehicle_information.clone())
     .fetch_one(&state.db)
     .await
 
@@ -312,6 +317,8 @@ async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<voyage_m
     let email = credentials.email.clone();
     let password = credentials.password.clone();
 
+
+
     // 1. Validate email and password (optional)
     // You can add logic here to validate email format or password length
 
@@ -327,14 +334,26 @@ async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<voyage_m
 
     match user_result {
     Ok(user) => {
-        if user.password != password {
-            Ok(HttpResponse::Ok().json("Invalid Credentials"))
-            
-        }else {
 
-            Ok(HttpResponse::Ok().json(&user))
+        let verify_password_result = verify_password(&password, &user.password);
 
+        match verify_password_result{
+            Ok(true) =>{
+                Ok(HttpResponse::Ok().json(&user))
+
+            },
+            Ok(false) => {
+                return Err(actix_web::error::ErrorInternalServerError("Invalid email or password"));
+            },
+            Err(err) => {
+                println!("Error verifying password: {}", err);
+                return Err(actix_web::error::ErrorInternalServerError(err.to_string()));
+            }
         }
+
+        
+            
+        
     },
     Err(err) => {
     // Convert sqlx::Error to actix_web::Error
@@ -349,3 +368,14 @@ async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<voyage_m
     // println!("Success");
     // Ok(HttpResponse::Ok().json(user_result.unwrap().clone()))
 }
+
+
+
+
+#[post("/voyage/drivers/location_update_create")]
+async fn add_driver_location_to_database(state: Data<AppState>, location_data: Json<driver_location_update_model::DriverLocationUpdate>) -> Result<HttpResponse, actix_web::Error>{
+    driver_location_update_model::add_driver_location_to_database(state,location_data).await
+
+   
+}
+

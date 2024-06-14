@@ -27,7 +27,7 @@ CREATE TABLE voyage_drivers (
   password VARCHAR(255) NOT NULL,
   license_number TEXT,
   vehicle_information TEXT,
-  rating FLOAT DEFAULT 0
+  rating VARCHAR(255) DEFAULT '0'
 
 );
 
@@ -39,6 +39,16 @@ CREATE TABLE cars (
     capacity INT NOT NULL,
     ride_type_id INT NOT NULL REFERENCES ride_types(id),
     driver_id INT NOT NULL REFERENCES voyage_drivers(id)
+);
+
+CREATE TABLE driver_locations (
+    id SERIAL PRIMARY KEY,
+    driver_id INT NOT NULL,
+    latitude DOUBLE PRECISION NOT NULL,
+    longitude DOUBLE PRECISION NOT NULL,
+    previous_latitude DOUBLE PRECISION,
+    previous_longitude DOUBLE PRECISION,
+    timestamp VARCHAR(255) DEFAULT CURRENT_TIMESTAMP
 );
 
 
