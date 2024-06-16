@@ -22,15 +22,7 @@ pub struct DriverLocationUpdate {
     pub timestamp: Option<String>,
 }
 
-impl DriverLocationUpdate{
-    
 
-
-    
-    
-
-
-}
 
 
 
@@ -45,7 +37,6 @@ pub async fn add_driver_location_to_database(state: Data<AppState>,body: Json<Dr
     .bind(body.previous_latitude)
     .bind(body.previous_longitude)
     .bind(body.timestamp.clone())
-
     .fetch_one(&state.db)
     .await
     {

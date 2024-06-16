@@ -1,8 +1,7 @@
 // use actix::fut::ok;
-use actix_web::{get, post, web::{Data,Json},
-
-// , Error, 
-HttpResponse, Responder
+use actix_web::{get, 
+    // guard::Options, 
+    post, web::{Data,Json}, HttpResponse, Responder
 };
 
 
@@ -12,6 +11,8 @@ use crate::AppState;
 mod models;
 mod voyage_user_sign_up_model;
 mod driver_location_update_model;
+mod update_earn_type_model;
+
 mod helper_functions;
 
 
@@ -57,17 +58,19 @@ async fn voyage_create_user(state: Data<AppState>,body: Json<voyage_user_sign_up
         phone_number: body.phone_number.clone(),
         account_created_at: None,
         last_login_at: None,
+        earn_type: Some(1)
     };
 
     match sqlx::query_as::<_, voyage_user_sign_up_model::VoyageUser>(
-        "INSERT INTO voyage_users (fullname, email, password, phone_number)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at",
+        "INSERT INTO voyage_users (fullname, email, password, phone_number, earn_type)
+        VALUES ($1, $2, $3, $4, $5,)
+        RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at, earn_type",
     )
     .bind(&user.fullname)
     .bind(&user.email)
     .bind(&user.password)
     .bind(&user.phone_number)
+    .bind(&user.earn_type)
     
     .fetch_one(&state.db)
     .await
@@ -377,5 +380,12 @@ async fn add_driver_location_to_database(state: Data<AppState>, location_data: J
     driver_location_update_model::add_driver_location_to_database(state,location_data).await
 
    
+}
+
+#[post("/voyage/drivers/update_earn_type")]
+async fn update_earn_type_to_database(state: Data<AppState>, location_data: Json<update_earn_type_model::EarnTypeUpdate>) -> Result<HttpResponse, actix_web::Error>{
+    update_earn_type_model::update_earn_type_to_database(state,location_data).await
+
+
 }
 

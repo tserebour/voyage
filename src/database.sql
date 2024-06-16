@@ -28,8 +28,14 @@ CREATE TABLE voyage_drivers (
   license_number TEXT,
   vehicle_information TEXT,
   rating VARCHAR(255) DEFAULT '0'
+  earn_type_id INT,
+
 
 );
+
+ALTER TABLE voyage_drivers ADD COLUMN earn_type_id integer;
+
+
 
 
 CREATE TABLE cars (

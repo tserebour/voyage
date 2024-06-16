@@ -56,6 +56,7 @@ async fn main() -> std::io::Result<()> {
             .service(services::voyage_driver_sign_in)
             .service(services::create_ride_request)
             .service(services::add_driver_location_to_database)
+            .service(services::update_earn_type_to_database)
 
             // .service(services::bra_fie_sign_in)
             // .service(services::bra_fie_create_user)
