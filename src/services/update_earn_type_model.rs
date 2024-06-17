@@ -15,7 +15,7 @@ HttpResponse,
 #[derive(Deserialize, Serialize, Debug, Clone,FromRow)]
 pub struct EarnTypeUpdate {
     pub driver_id: i32,
-    pub earn_type: i32,
+    pub earn_type: Option<i32>,
    
 }
 
@@ -23,7 +23,7 @@ pub struct EarnTypeUpdate {
 pub async fn update_earn_type_to_database(state: Data<AppState>,body: Json<EarnTypeUpdate>,) -> Result<HttpResponse, actix_web::Error>{
     match sqlx::query_as::<_,()>(
         "UPDATE voyage_drivers
-        SET earn_type_id = $1
+        SET earn_type = $1
         WHERE id = $2
         RETURNING  id;",
     )

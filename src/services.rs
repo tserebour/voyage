@@ -14,6 +14,7 @@ mod driver_location_update_model;
 mod update_earn_type_model;
 
 mod helper_functions;
+mod voyage_driver_sign_up_model;
 
 
 // use voyage_user_sign_up_model::VoyageUser;
@@ -58,19 +59,19 @@ async fn voyage_create_user(state: Data<AppState>,body: Json<voyage_user_sign_up
         phone_number: body.phone_number.clone(),
         account_created_at: None,
         last_login_at: None,
-        earn_type: Some(1)
+        
     };
 
     match sqlx::query_as::<_, voyage_user_sign_up_model::VoyageUser>(
-        "INSERT INTO voyage_users (fullname, email, password, phone_number, earn_type)
+        "INSERT INTO voyage_users (fullname, email, password, phone_number,)
         VALUES ($1, $2, $3, $4, $5,)
-        RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at, earn_type",
+        RETURNING id, fullname, email, password, phone_number, account_created_at, last_login_at",
     )
     .bind(&user.fullname)
     .bind(&user.email)
     .bind(&user.password)
     .bind(&user.phone_number)
-    .bind(&user.earn_type)
+    
     
     .fetch_one(&state.db)
     .await
@@ -285,9 +286,9 @@ async fn bra_fie_create_user(state:Data<AppState>, body: Json<bra_fie_models::Br
 
 
 #[post("/voyage/drivers/create")]
-async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_models::VoyageDriver>) -> impl Responder {
+async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_driver_sign_up_model::VoyageDriver>) -> impl Responder {
 
-    match sqlx::query_as::<_, voyage_models::VoyageDriver>(
+    match sqlx::query_as::<_, voyage_driver_sign_up_model::VoyageDriver>(
         "INSERT INTO voyage_drivers (fullname, email, password, license_number, vehicle_information) 
          VALUES ($1, $2, $3, $4, $5)
          RETURNING id, fullname, email, password, license_number, vehicle_information, rating",
@@ -297,6 +298,7 @@ async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_models::Vo
     .bind(hash_password(&body.password).unwrap().clone())
     .bind(body.license_number.clone())
     .bind(body.vehicle_information.clone())
+    
     .fetch_one(&state.db)
     .await
 
@@ -325,7 +327,7 @@ async fn voyage_driver_sign_in(state: Data<AppState>, credentials: Json<voyage_m
     // 1. Validate email and password (optional)
     // You can add logic here to validate email format or password length
 
-    let user_result = sqlx::query_as::<_, voyage_models::VoyageDriver>(
+    let user_result = sqlx::query_as::<_, voyage_driver_sign_up_model::VoyageDriver>(
     "SELECT * FROM voyage_drivers WHERE email = $1;",
     )
     .bind(email)

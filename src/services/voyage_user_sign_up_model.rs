@@ -12,5 +12,5 @@ use sqlx::{self, FromRow};
         pub phone_number: String,
         pub account_created_at: Option<String>,
         pub last_login_at: Option<String>,
-        pub earn_type: Option<i32>,
+        
     }
