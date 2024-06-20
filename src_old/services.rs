@@ -15,12 +15,14 @@ mod update_earn_type_model;
 
 mod helper_functions;
 mod voyage_driver_sign_up_model;
+mod my_websocket_model;
 
 
 // use voyage_user_sign_up_model::VoyageUser;
 use models::models::voyage_models;
 use models::models::bra_fie_models;
 use helper_functions::helpers_functions::{hash_password,verify_password};
+use actix_web_actors::ws;
 
 // use chrono::NaiveDateTime;
 
@@ -390,4 +392,11 @@ async fn update_earn_type_to_database(state: Data<AppState>, location_data: Json
 
 
 }
+
+
+// pub async fn websocket_handler(req: actix_web::HttpRequest, stream: actix_web::web::Payload, data: actix_web::web::Data<Addr<Server>>) -> actix_web::Result<actix_web::HttpResponse> {
+//     let server = data.get_ref().clone();
+//     let resp = ws::start(my_websocket_model::MyWebSocket::new(server), &req, stream);
+//     resp
+// }
 
