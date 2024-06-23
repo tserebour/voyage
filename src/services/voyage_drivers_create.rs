@@ -14,7 +14,7 @@ async fn voyage_create_driver(state:Data<AppState>, body: Json<voyage_driver_sig
     match sqlx::query_as::<_, voyage_driver_sign_up_model::VoyageDriver>(
         "INSERT INTO voyage_drivers (fullname, email, password, license_number, vehicle_information) 
          VALUES ($1, $2, $3, $4, $5)
-         RETURNING id, fullname, email, password, license_number, vehicle_information, rating",
+         RETURNING id, fullname, email, password, license_number, vehicle_information, rating,is_online",
     )
     .bind(body.fullname.to_string())
     .bind(body.email.to_string())

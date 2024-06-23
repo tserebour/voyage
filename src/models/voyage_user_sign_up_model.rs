@@ -13,4 +13,5 @@ use sqlx::{self, FromRow};
         pub account_created_at: Option<String>,
         pub last_login_at: Option<String>,
         
+        
     }

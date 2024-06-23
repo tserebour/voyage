@@ -7,6 +7,7 @@
 
 // use actix_cors::Cors;
 use std::time::Instant;
+use actix_web::web::Data;
 use actix_web::{
     // dev::Server, 
     // http, 
@@ -20,7 +21,8 @@ use actix_web::{
     
 };
 
-use sqlx::{Pool, Postgres};
+use sqlx::postgres::PgPoolOptions;
+use sqlx::{pool, Pool, Postgres};
 
 use actix::prelude::*;
 use actix_web_actors::ws;
@@ -58,11 +60,11 @@ async fn main() -> std::io::Result<()> {
 
     
 
-    // let pool = PgPoolOptions::new()
-    //     .max_connections(5)
-    //     .connect(&database_url)
-    //     .await
-    //     .expect("Failed to connect to the database");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("Failed to connect to the database");
 
     let ws_manager = WebSocketManager::new().start();
 
@@ -117,10 +119,11 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(ws_manager.clone()))
-            .route("/ws/", web::get().to(ws_index))
+            .app_data(Data::new(AppState{db: pool.clone()}))
+            .route("/ws/drivers_location_update", web::get().to(ws_index))
             .configure(services::config)
     })
-    .bind("127.0.0.1:8080")?
+    .bind(("0.0.0.0",port))?
     .run()
     .await
 }

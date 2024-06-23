@@ -32,6 +32,7 @@ impl Handler<Connect> for WebSocketManager {
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) {
         self.counter += 1;
         self.sessions.insert(self.counter, msg.addr);
+        println!("{} connected",self.sessions.len());
     }
 }
 
@@ -40,6 +41,7 @@ impl Handler<Disconnect> for WebSocketManager {
 
     fn handle(&mut self, msg: Disconnect, _: &mut Context<Self>) {
         self.sessions.remove(&msg.id);
+        println!("{} connected",self.sessions.len());
     }
 }
 

@@ -11,4 +11,5 @@ use sqlx::{self, FromRow};
             pub vehicle_information: Option<String>,
             pub rating: Option<String>,
             pub earn_type: Option<i32>,
+            pub is_online: bool,
         }

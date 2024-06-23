@@ -105,3 +105,18 @@ CREATE TABLE bra_fie_users(
 );
 
 INSERT INTO drivers_users (fullname, email, phone, password) VALUES ("Emmanuel Tabi", tserebour1@gmail.com,$3, $4) RETURNING id,fullname, email,phone, password
+
+
+CREATE OR REPLACE FUNCTION notify_driver_location()
+RETURNS trigger AS $$
+BEGIN
+    PERFORM pg_notify('driver_location', row_to_json(NEW)::text);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER driver_location_notify
+AFTER INSERT ON driver_locations
+FOR EACH ROW
+EXECUTE FUNCTION notify_driver_location();
