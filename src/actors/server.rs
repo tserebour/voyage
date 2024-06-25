@@ -10,14 +10,14 @@ use crate::actors::my_web_socket::{
 
 pub struct WebSocketManager {
     sessions: HashMap<usize, Addr<WebSocketSession>>,
-    counter: usize,
+   
 }
 
 impl WebSocketManager {
     pub fn new() -> Self {
         WebSocketManager {
             sessions: HashMap::new(),
-            counter: 0,
+            
         }
     }
 }
@@ -30,9 +30,9 @@ impl Handler<Connect> for WebSocketManager {
     type Result = ();
 
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) {
-        self.counter += 1;
-        self.sessions.insert(self.counter, msg.addr);
-        println!("{} connected",self.sessions.len());
+        let user_id = msg.id;
+        self.sessions.insert(user_id, msg.addr);
+        println!("{:#?} connected",self.sessions);
     }
 }
 

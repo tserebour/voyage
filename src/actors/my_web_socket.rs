@@ -12,6 +12,7 @@ pub struct BroadcastMessage(pub String);
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct Connect {
+    pub id: usize,
     pub addr: Addr<WebSocketSession>,
 }
 
@@ -42,6 +43,7 @@ impl Actor for WebSocketSession {
     fn started(&mut self, ctx: &mut Self::Context) {
         self.hb(ctx);
         self.addr.do_send(Connect {
+            id: self.id,
             addr: ctx.address(),
         });
     }

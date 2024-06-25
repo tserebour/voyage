@@ -6,7 +6,8 @@
 <body>
     <h1>WebSocket Test</h1>
     <script>
-        const socket = new WebSocket('ws://127.0.0.1:8080/ws/drivers_location_update');
+        const socket = new WebSocket('ws://127.0.0.1:8080/ws/drivers/2/drivers_location_update');
+        // const socket = new WebSocket('ws://127.0.0.1:8080/ws/drivers/1/ride_request');
 
         socket.onopen = function(event) {
             console.log('WebSocket is connected');

@@ -18,9 +18,12 @@ use actix_web::{
     HttpServer,
     HttpRequest,
     Responder,
+    HttpResponse,
+    Error
     
 };
 
+use sqlx::postgres::any::driver;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{pool, Pool, Postgres};
 
@@ -34,6 +37,8 @@ mod actors;
 
 use actors::server::WebSocketManager;
 use actors::my_web_socket::WebSocketSession;
+
+
 
 use actors::db_listener;
 
@@ -71,6 +76,12 @@ async fn main() -> std::io::Result<()> {
     let notification_service = db_listener::NotificationService::new(&database_url, ws_manager.clone()).await;
     let addr = notification_service.start();
     println!("Connected to {:#?}", addr);
+
+    // let server = ride_request::RideRequestServer {
+    //     pool: pool.clone(),
+    //     drivers: Vec::new(),
+    // }
+    // .start();
 
         
 
@@ -119,8 +130,11 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(ws_manager.clone()))
+            // .app_data(web::Data::new(server.clone()))
             .app_data(Data::new(AppState{db: pool.clone()}))
-            .route("/ws/drivers_location_update", web::get().to(ws_index))
+            
+            .route("/ws/drivers/{id}/drivers_location_update", web::get().to(ws_drivers_location_update))
+            // .route("/ws/drivers/{id}/ride_request", web::get().to(ws_ride_request))
             .configure(services::config)
     })
     .bind(("0.0.0.0",port))?
@@ -150,13 +164,33 @@ async fn main() -> std::io::Result<()> {
 
 
 /// WebSocket route
-async fn ws_index(
+async fn ws_drivers_location_update(
     req: HttpRequest,
     stream: web::Payload,
     data: web::Data<Addr<WebSocketManager>>,
 ) -> impl Responder {
+
+
+    let driver_id = req.match_info().get("id").unwrap().parse::<usize>().unwrap();
+
     let addr = data.get_ref().clone();
-    ws::start(WebSocketSession { id: 0, hb: Instant::now(), addr }, &req, stream)
+    ws::start(WebSocketSession { id: driver_id, hb: Instant::now(), addr }, &req, stream)
 }
+
+
+
+
+
+// async fn ws_ride_request(
+//     req: HttpRequest,
+//     stream: web::Payload,
+//     srv: web::Data<Addr<ride_request::RideRequestServer>>,
+// ) -> Result<HttpResponse, Error> {
+    // let driver_id = req.match_info().get("id").unwrap().parse::<i32>().unwrap();
+//     // let driver_id = 1;
+//     println!("{:?}", driver_id);
+//     let res = ws::start(ride_request::DriverSession::new(driver_id, srv.get_ref().clone()), &req, stream);
+//     res
+// }
 
 
