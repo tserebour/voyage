@@ -69,10 +69,9 @@ CREATE TABLE ride_requests (
     dropoff_latitude FLOAT NOT NULL,
     dropoff_longitude FLOAT NOT NULL,
     ride_type_id INT NOT NULL REFERENCES ride_types(id),
-    car_id INT NOT NULL REFERENCES cars(id),
     estimated_fare NUMERIC(10, 2),
     requested_at VARCHAR(255) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status TEXT NOT NULL DEFAULT 'REQUESTED'
+    status TEXT NOT NULL DEFAULT 'PENDING'
 );
 
 CREATE TABLE rides (

@@ -10,8 +10,9 @@ use crate::models::ride_request_model;
 
 use crate::AppState;
 
-#[post("/ride_requests")]
+#[post("/voyage/ride_requests")]
 async fn create_ride_request(state: Data<AppState>, ride_request: Json<ride_request_model::RideRequest>) -> Result<HttpResponse, actix_web::Error> {
+    println!("{:?}", ride_request);
     let result = sqlx::query_as::<_, ride_request_model::RideRequest>(
         
         "INSERT INTO ride_requests (
@@ -22,20 +23,20 @@ async fn create_ride_request(state: Data<AppState>, ride_request: Json<ride_requ
             dropoff_address,
             dropoff_latitude,
             dropoff_longitude,
-            ride_type_id,
-            car_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING id, user_id, pickup_address, pickup_latitude, pickup_longitude, dropoff_address, dropoff_latitude, dropoff_longitude, ride_type_id, estimated_fare, requested_at, status,car_id;"
+            ride_type_id
+            
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, user_id, pickup_address, pickup_latitude, pickup_longitude, dropoff_address, dropoff_latitude, dropoff_longitude, ride_type_id, estimated_fare, requested_at, status;"
         )
-        .bind(ride_request.user_id.clone())
+        .bind(ride_request.user_id)
         .bind(ride_request.pickup_address.clone())
-        .bind(ride_request.pickup_latitude.clone())
-        .bind(ride_request.pickup_longitude.clone())
+        .bind(ride_request.pickup_latitude)
+        .bind(ride_request.pickup_longitude)
         .bind(ride_request.dropoff_address.clone())
-        .bind(ride_request.dropoff_latitude.clone())
-        .bind(ride_request.dropoff_longitude.clone())
-        .bind(ride_request.ride_type_id.clone())   
-        .bind(ride_request.car_id.clone())    
+        .bind(ride_request.dropoff_latitude)
+        .bind(ride_request.dropoff_longitude)
+        .bind(ride_request.ride_type_id)   
+         
 
         .fetch_one(&state.db)
         .await;

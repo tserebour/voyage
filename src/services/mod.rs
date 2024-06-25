@@ -12,6 +12,7 @@ pub mod voyage_drivers_login;
 pub mod voyage_driver_earn_type_update;
 pub mod voyage_drivers_location_update_create;
 pub mod update_driver_online_status;
+pub mod update_driver_location;
 
 
 
@@ -26,7 +27,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .service(ride_requests::create_ride_request)
        .service(voyage_drivers_location_update_create::add_driver_location_to_database)
        .service(voyage_driver_earn_type_update::update_earn_type_to_database)
-        .service(update_driver_online_status::update_driver_status);
+        .service(update_driver_online_status::update_driver_status)
+    .service(update_driver_location::update_driver_location);
 
     
        

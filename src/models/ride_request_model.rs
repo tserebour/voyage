@@ -27,5 +27,5 @@ use serde::{Serialize, Deserialize};
             pub estimated_fare: Option<f64>,
             pub requested_at: Option<String>,
             pub status: String,
-            pub car_id: Option<i32>,
+            
         }

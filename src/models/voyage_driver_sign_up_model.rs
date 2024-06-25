@@ -12,4 +12,6 @@ use sqlx::{self, FromRow};
             pub rating: Option<String>,
             pub earn_type: Option<i32>,
             pub is_online: bool,
+            pub current_latitude: Option<f64>,
+            pub current_longitude: Option<f64>,
         }

@@ -5,5 +5,6 @@ pub mod update_earn_type_model;
 pub mod voyage_driver_sign_up_model;
 pub mod brafie_models;
 pub mod voyage_users_login_credentials_model;
+pub mod update_location_model;
 
 
