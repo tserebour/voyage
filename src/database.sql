@@ -28,12 +28,21 @@ CREATE TABLE voyage_drivers (
   license_number TEXT,
   vehicle_information TEXT,
   rating VARCHAR(255) DEFAULT '0',
-  earn_type INT
+  earn_type INT,
+  current_latitude DOUBLE PRECISION NULL,
+  current_longitude DOUBLE PRECISION NULL
+
 
 
 );
 
 ALTER TABLE voyage_drivers ADD COLUMN earn_type_id integer;
+
+
+ALTER TABLE voyage_drivers
+ADD COLUMN current_latitude DOUBLE PRECISION NULL,
+ADD COLUMN current_longitude DOUBLE PRECISION NULL;
+
 
 
 

@@ -49,6 +49,7 @@ impl Actor for WebSocketSession {
     }
 
     fn stopping(&mut self, ctx: &mut Self::Context) -> Running {
+        let _ = ctx;
         self.addr.do_send(Disconnect { id: self.id });
         Running::Stop
     }

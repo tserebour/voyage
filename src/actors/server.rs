@@ -9,14 +9,17 @@ use crate::actors::my_web_socket::{
 };
 
 pub struct WebSocketManager {
-    sessions: HashMap<usize, Addr<WebSocketSession>>,
-   
+    driver_sessions: HashMap<usize, Addr<WebSocketSession>>,
+    user_sessions: HashMap<usize, Addr<WebSocketSession>>
+
 }
 
 impl WebSocketManager {
     pub fn new() -> Self {
         WebSocketManager {
-            sessions: HashMap::new(),
+            driver_sessions: HashMap::new(),
+            user_sessions: HashMap::new(),
+            
             
         }
     }
@@ -31,8 +34,8 @@ impl Handler<Connect> for WebSocketManager {
 
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) {
         let user_id = msg.id;
-        self.sessions.insert(user_id, msg.addr);
-        println!("{:#?} connected",self.sessions);
+        self.driver_sessions.insert(user_id, msg.addr);
+        println!("{:#?} connected",self.driver_sessions);
     }
 }
 
@@ -40,8 +43,8 @@ impl Handler<Disconnect> for WebSocketManager {
     type Result = ();
 
     fn handle(&mut self, msg: Disconnect, _: &mut Context<Self>) {
-        self.sessions.remove(&msg.id);
-        println!("{} connected",self.sessions.len());
+        self.driver_sessions.remove(&msg.id);
+        println!("{} connected",self.driver_sessions.len());
     }
 }
 
@@ -49,7 +52,7 @@ impl Handler<BroadcastMessage> for WebSocketManager {
     type Result = ();
 
     fn handle(&mut self, msg: BroadcastMessage, _: &mut Context<Self>) {
-        for session in self.sessions.values() {
+        for session in self.driver_sessions.values() {
             session.do_send(BroadcastMessage(msg.0.clone()));
         }
     }
