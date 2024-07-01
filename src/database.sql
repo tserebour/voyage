@@ -6,7 +6,7 @@ CREATE TABLE voyage_users (
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   phone_number VARCHAR(20) NOT NULL UNIQUE,
-  account_created_at VARCHAR(255) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  account_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_login_at VARCHAR(255)
 );
 
@@ -18,6 +18,8 @@ CREATE TABLE ride_types (
     rate_per_mile NUMERIC(10, 2) NOT NULL,
     rate_per_minute NUMERIC(10, 2) NOT NULL
 );
+
+--  ieja
 
 
 CREATE TABLE voyage_drivers (
@@ -128,3 +130,14 @@ CREATE TRIGGER driver_location_notify
 AFTER INSERT ON driver_locations
 FOR EACH ROW
 EXECUTE FUNCTION notify_driver_location();
+
+
+
+
+select name, ST Distance (a.geolocation, hr_jax.geolocation) as distance
+from addresses a,
+lateral(
+select id, geolocation from addresses where name = 'Hashrocket JAX'
+) as hr_jax
+where a.id hr_jax.id
+order by distance;
